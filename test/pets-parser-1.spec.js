@@ -71,8 +71,6 @@ describe('Pets Parser #1', function () {
       var st3 = parser.stage3(st2)
       var st4 = parser.stage4(st3)
 
-      console.log(JSON.stringify(st4))
-
       chai.expect(st4[0].labelRegion).to.deep.equal([
         {"boundingBox":"27,115,49,10","value":"client_id"},
         {"boundingBox":"27,129,69,10","value":"client_name"},
@@ -99,7 +97,7 @@ describe('Pets Parser #1', function () {
   describe('#parse', function () {
     it('should return key/value list from ocr data', function () {
       var structuredData = parser.parse(testData)
-
+      
       chai.expect(structuredData).to.deep.equal([
         { label: 'client_id', value: ' 214553' },
         { label: 'client_name', value: ' Dr Herron, Andrew' },
