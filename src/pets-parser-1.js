@@ -179,7 +179,7 @@ function stage5(input) {
     for (var j = 0; j < input[i].labelRegion.length; j++) {
       results.push({
         label: input[i].labelRegion[j].value,
-        value: input[i].dataRegion[j].value
+        value: _.trim(input[i].dataRegion[j].value)
       })
     }
   }

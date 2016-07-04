@@ -97,14 +97,14 @@ describe('Pets Parser #1', function () {
   describe('#parse', function () {
     it('should return key/value list from ocr data', function () {
       var structuredData = parser.parse(testData)
-      
+
       chai.expect(structuredData).to.deep.equal([
-        { label: 'client_id', value: ' 214553' },
-        { label: 'client_name', value: ' Dr Herron, Andrew' },
-        { label: 'address', value: ' 7 Carlyle st  Wollstonecraft, NSW 2065' },
-        { label: 'patient_id', value: ' 131657' },
-        { label: 'name', value: ' Eddie' },
-        { label: 'species', value: ' Feline' }
+        { label: 'client_id', value: '214553' },
+        { label: 'client_name', value: 'Dr Herron, Andrew' },
+        { label: 'address', value: '7 Carlyle st  Wollstonecraft, NSW 2065' },
+        { label: 'patient_id', value: '131657' },
+        { label: 'name', value: 'Eddie' },
+        { label: 'species', value: 'Feline' }
       ])
     })
   })
