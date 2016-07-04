@@ -74,12 +74,14 @@ describe('Pets Parser #1', function () {
       chai.expect(st4[0].labelRegion).to.deep.equal([
         {"boundingBox":"27,115,49,10","value":"client_id"},
         {"boundingBox":"27,129,69,10","value":"client_name"},
-        {"boundingBox":"30,166,47,10","value":"address"}
+        {"boundingBox":"30,166,47,10","value":"address"},
+        {"boundingBox": "26,207,60,13","value": "telephone"}
       ])
       chai.expect(st4[0].dataRegion).to.deep.equal([
         {"value":" 214553"},
         {"value":" Dr Herron, Andrew"},
-        {"value":" 7 Carlyle st  Wollstonecraft, NSW 2065"}
+        {"value":" 7 Carlyle st  Wollstonecraft, NSW 2065"},
+        {"value":" 9460 9943"}
       ])
       chai.expect(st4[1].labelRegion).to.deep.equal([
         {"boundingBox":"418,108,56,10","value":"patient_id"},
@@ -102,6 +104,7 @@ describe('Pets Parser #1', function () {
         { label: 'client_id', value: '214553' },
         { label: 'client_name', value: 'Dr Herron, Andrew' },
         { label: 'address', value: '7 Carlyle st  Wollstonecraft, NSW 2065' },
+        { label: 'telephone', value: '9460 9943' },
         { label: 'patient_id', value: '131657' },
         { label: 'name', value: 'Eddie' },
         { label: 'species', value: 'Feline' }

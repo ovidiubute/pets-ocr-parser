@@ -122,6 +122,7 @@ function stage4(input) {
     // No luck :-(
     _.forEach(input, function (regionObject) {
       var results = []
+      var overflowed = 0
       for (var i = 0; i < regionObject.labelRegion.length; i++) {
         var labelYAxisValue = _.toNumber(regionObject.labelRegion[i].boundingBox.split(',')[1])
         var dataYAxisValue = _.toNumber(regionObject.dataRegion[i].boundingBox.split(',')[1])
@@ -140,6 +141,7 @@ function stage4(input) {
 
             if ((jLabelYAxisValue - jDataYAxisValue) > Y_AXIS_PIXEL_THRESHOLD) {
               potentialValue += ' ' + regionObject.dataRegion[j].value
+              overflowed++
             }
           }
 
@@ -153,8 +155,22 @@ function stage4(input) {
             value: regionObject.dataRegion[i].value
           })
         } else {
-          // No label
-          delete regionObject.labelRegion[i]
+          // Overflowed?
+          if (overflowed) {
+            var labelYAxisValue = _.toNumber(regionObject.labelRegion[i].boundingBox.split(',')[1])
+            var dataYAxisValue = _.toNumber(regionObject.dataRegion[i + overflowed].boundingBox.split(',')[1])
+            var dataYRange = _.range(labelYAxisValue - Y_AXIS_PIXEL_THRESHOLD,
+              labelYAxisValue + Y_AXIS_PIXEL_THRESHOLD)
+
+            if (_.includes(dataYRange, dataYAxisValue)) {
+              results.push({
+                value: regionObject.dataRegion[i + overflowed].value
+              })
+            }
+          } else {
+            // No label
+            delete regionObject.labelRegion[i]
+          }
         }
       }
       regionObject.dataRegion = results
