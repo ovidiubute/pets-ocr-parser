@@ -86,12 +86,18 @@ describe('Pets Parser #1', function () {
       chai.expect(st4[1].labelRegion).to.deep.equal([
         {"boundingBox":"418,108,56,10","value":"patient_id"},
         {"boundingBox":"418,123,34,9","value":"name"},
-        {"boundingBox":"418,137,44,12","value":"species"}
+        {"boundingBox":"418,137,44,12","value":"species"},
+        {"boundingBox":"418,207,31,10","value":"color"},
+        {"boundingBox":"418,225,55,12","value":"microchip"},
+        {"boundingBox":"418,244,58,10","value": "birth_date"}
       ])
       chai.expect(st4[1].dataRegion).to.deep.equal([
         {"value":" 131657"},
         {"value":" Eddie"},
-        {"value":" Feline"}
+        {"value":" Feline"},
+        {"value": " Black"},
+        {"value": " 981000300550586"},
+        {"value": " 01-11-2011"}
       ])
     })
   })
@@ -107,7 +113,10 @@ describe('Pets Parser #1', function () {
         { label: 'telephone', value: '9460 9943' },
         { label: 'patient_id', value: '131657' },
         { label: 'name', value: 'Eddie' },
-        { label: 'species', value: 'Feline' }
+        { label: 'species', value: 'Feline' },
+        { label: 'color', value: 'Black' },
+        { label: 'microchip', value: '981000300550586' },
+        { label: 'birth_date', value: '01-11-2011' }
       ])
     })
   })

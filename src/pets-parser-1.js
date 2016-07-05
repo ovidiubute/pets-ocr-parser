@@ -43,6 +43,10 @@ function _findIndexOfInterestingRegions(regions) {
   })
 }
 
+function _yAxis(input) {
+  return _.toNumber(input.boundingBox.split(',')[1])
+}
+
 // Filter out uninteresting boxes, output list of labelRegion/dataRegion
 function stage1(input) {
   var interestingIndexes = _findIndexOfInterestingRegions(input.regions)
@@ -124,8 +128,7 @@ function stage4(input) {
       var results = []
       var overflowed = 0
       for (var i = 0; i < regionObject.labelRegion.length; i++) {
-        var labelYAxisValue = _.toNumber(regionObject.labelRegion[i].boundingBox.split(',')[1])
-        var dataYAxisValue = _.toNumber(regionObject.dataRegion[i].boundingBox.split(',')[1])
+        var labelYAxisValue = _yAxis(regionObject.labelRegion[i])
         var dataYRange = _.range(labelYAxisValue - Y_AXIS_PIXEL_THRESHOLD,
           labelYAxisValue + Y_AXIS_PIXEL_THRESHOLD)
 
@@ -136,8 +139,8 @@ function stage4(input) {
                 j >= regionObject.labelRegion.length) {
               continue
             }
-            var jLabelYAxisValue = _.toNumber(regionObject.labelRegion[j].boundingBox.split(',')[1])
-            var jDataYAxisValue = _.toNumber(regionObject.dataRegion[j].boundingBox.split(',')[1])
+            var jLabelYAxisValue = _yAxis(regionObject.labelRegion[j])
+            var jDataYAxisValue = _yAxis(regionObject.dataRegion[j])
 
             if ((jLabelYAxisValue - jDataYAxisValue) > Y_AXIS_PIXEL_THRESHOLD) {
               potentialValue += ' ' + regionObject.dataRegion[j].value
@@ -150,26 +153,28 @@ function stage4(input) {
               value: potentialValue
             })
           }
-        } else if (_.includes(dataYRange, dataYAxisValue)) {
-          results.push({
-            value: regionObject.dataRegion[i].value
-          })
         } else {
-          // Overflowed?
+          var searchIndex = i
           if (overflowed) {
-            var labelYAxisValue = _.toNumber(regionObject.labelRegion[i].boundingBox.split(',')[1])
-            var dataYAxisValue = _.toNumber(regionObject.dataRegion[i + overflowed].boundingBox.split(',')[1])
-            var dataYRange = _.range(labelYAxisValue - Y_AXIS_PIXEL_THRESHOLD,
-              labelYAxisValue + Y_AXIS_PIXEL_THRESHOLD)
+            searchIndex += overflowed
+          }
+          var dataYAxisValue = _yAxis(regionObject.dataRegion[searchIndex])
 
-            if (_.includes(dataYRange, dataYAxisValue)) {
-              results.push({
-                value: regionObject.dataRegion[i + overflowed].value
-              })
-            }
+          if (_.includes(dataYRange, dataYAxisValue)) {
+            results.push({
+              value: regionObject.dataRegion[searchIndex].value
+            })
           } else {
-            // No label
-            delete regionObject.labelRegion[i]
+            // Not found so probably labels were skipped by ocrData
+            // Do a full scan before giving up
+            for (var q = 0; q < regionObject.dataRegion.length; q++) {
+              var qDataYAxisValue = _yAxis(regionObject.dataRegion[q])
+              if (_.includes(dataYRange, qDataYAxisValue)) {
+                results.push({
+                  value: regionObject.dataRegion[q].value
+                })
+              }
+            }
           }
         }
       }
