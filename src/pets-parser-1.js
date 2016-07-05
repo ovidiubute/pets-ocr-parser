@@ -181,15 +181,7 @@ function stage4(input) {
       regionObject.dataRegion = results
     })
 
-    // Delete nulls caused by delete command..
-    return _.map(input, function (obj) {
-      return {
-        dataRegion: obj.dataRegion,
-        labelRegion: _.filter(obj.labelRegion, function (labelObj) {
-          return labelObj != null
-        })
-      }
-    })
+    return input
   }
 }
 
