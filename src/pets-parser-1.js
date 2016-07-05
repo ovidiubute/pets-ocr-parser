@@ -119,10 +119,7 @@ function stage4(input) {
     regionObject.labelRegion.length === regionObject.dataRegion.length
   })
 
-  if (perfectMatch) {
-    // Nothing to do
-    return input
-  } else {
+  if (!perfectMatch) {
     // No luck :-(
     _.forEach(input, function (regionObject) {
       var results = []
@@ -180,9 +177,9 @@ function stage4(input) {
       }
       regionObject.dataRegion = results
     })
-
-    return input
   }
+
+  return input
 }
 
 // Pretty print (remove boundingBox, etc.) for library users
