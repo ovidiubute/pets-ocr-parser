@@ -198,7 +198,7 @@ function stage5(input) {
 
 module.exports = {
   parse: function (ocrData) {
-    return stage5(stage4(stage3(stage2(stage1(ocrData)))))
+    return _.flow([stage1, stage2, stage3, stage4, stage5])(ocrData)
   },
   stage1: stage1,
   stage2: stage2,

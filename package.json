@@ -10,7 +10,6 @@
   "license": "SEE LICENSE",
   "devDependencies": {
     "chai": "^3.5.0",
-    "chai-things": "^0.2.0",
     "mocha": "^2.5.3"
   },
   "dependencies": {
