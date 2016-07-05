@@ -1,15 +1,20 @@
 var parser = require('../src/pets-parser-1')
-var testData = require('./pets-ocr-data-1')
+var testDatas = [
+  require('./pets-ocr-data-1'),
+  require('./pets-ocr-data-2')
+]
 var chai = require('chai')
 
 describe('Pets Parser #1', function () {
   describe('#stage1', function () {
     it('should only return regions containing interesting words', function () {
-      var regions = parser.stage1(testData)
-      chai.expect(regions.length).to.equal(2)
-      for (var i = 0; i < 2; i++) {
-        chai.expect(regions[i].labelRegion).not.equal(undefined)
-        chai.expect(regions[i].dataRegion).not.equal(undefined)
+      for (testData in testDatas) {
+        var regions = parser.stage1(testData)
+        chai.expect(regions.length).to.equal(2)
+        for (var i = 0; i < 2; i++) {
+          chai.expect(regions[i].labelRegion).not.equal(undefined)
+          chai.expect(regions[i].dataRegion).not.equal(undefined)
+        }
       }
     })
   })
