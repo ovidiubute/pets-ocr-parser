@@ -165,7 +165,7 @@ describe('VET Parser', function () {
             data: ['214553', 'Dr Herron, Andrew', '7 Carlyle st', 'Wollstonecraft, NSW 2065', '9460 9943' ]
           },
           {
-            labels: ['patient_id', 'name', 'species', 'color', 'breed', 'sex', 'microchip', 'birth_date'],
+            labels: ['patient_id', 'name', 'species', 'breed', 'sex', 'color', 'microchip', 'birth_date'],
             data: [ '131657','Eddie','Feline','Shorthair, Domestic','Male','Black','981000300550586','01-11-2011' ]
           }
         ]
@@ -179,7 +179,39 @@ describe('VET Parser', function () {
             data: ['214553', 'Dr Herron. Andrew', '7 Carlyle st', 'Wollstonecraft. NSW 2065', '9460 9943' ]
           },
           {
-            labels: ['patient_id', 'name', 'species', 'color', 'breed', 'sex', 'microchip', 'birth_date'],
+            labels: ['patient_id', 'name', 'species', 'breed', 'sex', 'color', 'microchip', 'birth_date'],
+            data: [ '431657,','Eddie','Feline','Shorthair, Domestic','Male','Black','981000300550586','01-11-2011' ]
+          }
+        ]
+      )
+    })
+  })
+
+  describe('#mergeData', () => {
+    it('should merge or remove data from data section according to label config', () => {
+      let result = parser.mergeData(parser.conjLabels(parser.pickDataRegions(parser.flattenWords(testDatas[0].regions))))
+      chai.expect(result).to.deep.equal(
+        [
+          {
+            labels: ['client_id', 'client_name', 'address', 'telephone'],
+            data: ['214553', 'Dr Herron, Andrew', '7 Carlyle st Wollstonecraft, NSW 2065', '9460 9943' ]
+          },
+          {
+            labels: ['patient_id', 'name', 'species', 'breed', 'sex', 'color', 'microchip', 'birth_date'],
+            data: [ '131657','Eddie','Feline','Shorthair, Domestic','Male','Black','981000300550586','01-11-2011' ]
+          }
+        ]
+      )
+
+      result = parser.mergeData(parser.conjLabels(parser.pickDataRegions(parser.flattenWords(testDatas[1].regions))))
+      chai.expect(result).to.deep.equal(
+        [
+          {
+            labels: ['client_id', 'client_name', 'address', 'telephone'],
+            data: ['214553', 'Dr Herron. Andrew', '7 Carlyle st Wollstonecraft. NSW 2065', '9460 9943' ]
+          },
+          {
+            labels: ['patient_id', 'name', 'species', 'breed', 'sex', 'color', 'microchip', 'birth_date'],
             data: [ '431657,','Eddie','Feline','Shorthair, Domestic','Male','Black','981000300550586','01-11-2011' ]
           }
         ]
