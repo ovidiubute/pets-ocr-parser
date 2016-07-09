@@ -217,5 +217,113 @@ describe('VET Parser', function () {
         ]
       )
     })
+
+    describe('#zipLabelsWithData', () => {
+      it('should return a list of objects where label is the key and the value is taken from data', () => {
+        let result = parser.zipLabelsWithData(parser.mergeData(parser.conjLabels(parser.pickDataRegions(parser.flattenWords(testDatas[0].regions)))))
+        chai.expect(result).to.deep.equal({
+          'client_id': '214553',
+          'client_name': 'Dr Herron, Andrew',
+          'address': '7 Carlyle st Wollstonecraft, NSW 2065',
+          'telephone': '9460 9943',
+          'patient_id': '131657',
+          'name': 'Eddie',
+          'species': 'Feline',
+          'breed': 'Shorthair, Domestic',
+          'sex': 'Male',
+          'color': 'Black',
+          'microchip': '981000300550586',
+          'birth_date': '01-11-2011'
+        })
+
+        result = parser.zipLabelsWithData(parser.mergeData(parser.conjLabels(parser.pickDataRegions(parser.flattenWords(testDatas[1].regions)))))
+        chai.expect(result).to.deep.equal({
+          'client_id': '214553',
+          'client_name': 'Dr Herron. Andrew',
+          'address': '7 Carlyle st Wollstonecraft. NSW 2065',
+          'telephone': '9460 9943',
+          'patient_id': '431657,',
+          'name': 'Eddie',
+          'species': 'Feline',
+          'breed': 'Shorthair, Domestic',
+          'sex': 'Male',
+          'color': 'Black',
+          'microchip': '981000300550586',
+          'birth_date': '01-11-2011'
+        })
+      })
+    })
+
+    describe('#applyDataTypes', () => {
+      it('should return correct data types', () => {
+        let result = parser.applyDataTypes(parser.zipLabelsWithData(parser.mergeData(parser.conjLabels(parser.pickDataRegions(parser.flattenWords(testDatas[0].regions))))))
+        chai.expect(result).to.deep.equal({
+          'client_id': 214553,
+          'client_name': 'Dr Herron, Andrew',
+          'address': '7 Carlyle st Wollstonecraft, NSW 2065',
+          'telephone': '9460 9943',
+          'patient_id': 131657,
+          'name': 'Eddie',
+          'species': 'Feline',
+          'breed': 'Shorthair, Domestic',
+          'sex': 'Male',
+          'color': 'Black',
+          'microchip': 981000300550586,
+          'birth_date': '01-11-2011'
+        })
+
+        result = parser.applyDataTypes(parser.zipLabelsWithData(parser.mergeData(parser.conjLabels(parser.pickDataRegions(parser.flattenWords(testDatas[1].regions))))))
+        chai.expect(result).to.deep.equal({
+          'client_id': 214553,
+          'client_name': 'Dr Herron. Andrew',
+          'address': '7 Carlyle st Wollstonecraft. NSW 2065',
+          'telephone': '9460 9943',
+          'patient_id': 431657,
+          'name': 'Eddie',
+          'species': 'Feline',
+          'breed': 'Shorthair, Domestic',
+          'sex': 'Male',
+          'color': 'Black',
+          'microchip': 981000300550586,
+          'birth_date': '01-11-2011'
+        })
+      })
+    })
+
+    describe('#parse', () => {
+      it('should apply all data transformation functions', () => {
+        let result = parser.parse(testDatas[0])
+        chai.expect(result).to.deep.equal({
+          'client_id': 214553,
+          'client_name': 'Dr Herron, Andrew',
+          'address': '7 Carlyle st Wollstonecraft, NSW 2065',
+          'telephone': '9460 9943',
+          'patient_id': 131657,
+          'name': 'Eddie',
+          'species': 'Feline',
+          'breed': 'Shorthair, Domestic',
+          'sex': 'Male',
+          'color': 'Black',
+          'microchip': 981000300550586,
+          'birth_date': '01-11-2011'
+        })
+
+        result = parser.parse(testDatas[1])
+        chai.expect(result).to.deep.equal({
+          'client_id': 214553,
+          'client_name': 'Dr Herron. Andrew',
+          'address': '7 Carlyle st Wollstonecraft. NSW 2065',
+          'telephone': '9460 9943',
+          'patient_id': 431657,
+          'name': 'Eddie',
+          'species': 'Feline',
+          'breed': 'Shorthair, Domestic',
+          'sex': 'Male',
+          'color': 'Black',
+          'microchip': 981000300550586,
+          'birth_date': '01-11-2011'
+        })
+      })
+    })
   })
 })

@@ -89,13 +89,46 @@ function mergeData(contentRegions) {
         }
       }
     }
-// [0,1,2,3,4], 2-3 overflowed, index = 2, take1=0,1,2 diff=1, take2=4
+
     return contentRegion
   })
 }
 
+function zipLabelsWithData(contentRegions) {
+  return _.reduce([0, 1].map((index) => {
+    return _.zipObject(contentRegions[index].labels, contentRegions[index].data)
+  }), (accum, value) => {
+    _.extend(accum, value)
+
+    return accum
+  }, {})
+}
+
+function applyDataTypes(structuredData) {
+  _.forEach(LABELS, (label) => {
+    // Clean number typed data because otherwise it may fail at _.toNumber
+    let dataType = label.meta.data.type
+    if (dataType === 'Number' || dataType === 'Integer') {
+      _.set(structuredData, label.slug, helpers.clean(_.get(structuredData, label.slug)))
+    }
+
+    // Apply type conversion
+    let typeFn = _[`to${dataType}`]
+    _.set(structuredData, label.slug, typeFn.call(null, _.get(structuredData, label.slug)))
+  })
+
+  return structuredData
+}
+
 function parse(data) {
-  return _.flow([flattenWords, pickDataRegions, conjLabels, mergeData])(data.regions)
+  return _.flow([
+    flattenWords,
+    pickDataRegions,
+    conjLabels,
+    mergeData,
+    zipLabelsWithData,
+    applyDataTypes
+  ])(data.regions)
 }
 
 module.exports = {
@@ -103,5 +136,7 @@ module.exports = {
   pickDataRegions,
   conjLabels,
   mergeData,
+  zipLabelsWithData,
+  applyDataTypes,
   parse
 }
