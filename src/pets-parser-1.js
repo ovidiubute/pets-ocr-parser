@@ -36,7 +36,19 @@ function pickDataRegions(contentRegions) {
   })
 }
 
+function conjLabels(contentRegions) {
+  return _.map(contentRegions, (contentRegion, contentIndex) => {
+    return {
+      labels: _.map(_.filter(LABELS, (label) => {
+        return label.position == contentIndex
+      }), label => label.slug),
+      data: contentRegion.data
+    }
+  })
+}
+
 module.exports = {
   flattenWords,
-  pickDataRegions
+  pickDataRegions,
+  conjLabels
 }
