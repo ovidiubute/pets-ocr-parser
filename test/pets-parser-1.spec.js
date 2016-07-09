@@ -1,95 +1,156 @@
 var parser = require('../src/pets-parser-1')
 var testDatas = [
-  require('./pets-ocr-data-1'),
-  require('./pets-ocr-data-2')
+  require('./fixtures/pets-ocr-data-1'),
+  require('./fixtures/pets-ocr-data-2')
 ]
 var chai = require('chai')
 
-describe('Pets Parser #1', function () {
-  describe('#stage1', function () {
-    it('should only return regions containing interesting words', function () {
-      for (testData in testDatas) {
-        var regions = parser.stage1(testData)
-        chai.expect(regions.length).to.equal(2)
-        for (var i = 0; i < 2; i++) {
-          chai.expect(regions[i].labelRegion).not.equal(undefined)
-          chai.expect(regions[i].dataRegion).not.equal(undefined)
-        }
-      }
+describe('VET Parser', function () {
+  describe('#flattenWords', function () {
+    it('should flatten regions by merging all words per line', () => {
+      chai.expect(parser.flattenWords(testDatas[0].regions)).to.deep.equal([
+        [
+          "www.vetmed.com.au",
+          "Vaccination & Health Certificate"
+        ],
+        [
+          "Client ID:",
+          "Client Name:",
+          "Address:",
+          "Telephone:"
+        ],
+        [
+          "214553",
+          "Dr Herron, Andrew",
+          "7 Carlyle st",
+          "Wollstonecraft, NSW 2065",
+          "9460 9943"
+        ],
+        [
+          "23-05-2016",
+          "patient ID:",
+          "Name:",
+          "Species:",
+          "Color:",
+          "Microchip:",
+          "Birth Date:"
+        ],
+        [
+          "131657",
+          "Eddie",
+          "Feline",
+          "Shorthair, Domestic",
+          "Male",
+          "Black",
+          "981000300550586",
+          "01-11-2011"
+        ],
+        [
+          "I hereby certify that the above animal has had a general health check and vaccination. The following vaccinations are",
+          "current.",
+          "Points to remember:",
+          "•Full protection after vaccination may take 2 weeks",
+          "*A 6 monthly booster for bordetella is required for boarding otherwise a yearly vaccination is sufficient.",
+          "*Vaccines are harmless.Therefore, if your pet shows signs of illness after vaccinations please contact us.",
+          "•Heart worm prevention for dogs is an ongoing treatment, for life."
+        ],
+        [
+          "*Worm regular every 3 months",
+          "28-03-2013"
+        ],
+        [
+          "Vaccination Description:",
+          "Vaccination F3"
+        ]
+      ])
+
+      chai.expect(parser.flattenWords(testDatas[1].regions)).to.deep.equal([
+        [
+          "Randwjck NSW 2031"
+        ],
+        [
+          "Northbridge NSW Å063"
+        ],
+        [
+          "West Undfield NSW 2070"
+        ],
+        [
+          "Vaccination & Health Certificate",
+          "23-05-2016"
+        ],
+        [
+          "aient1D:",
+          "Client Name:",
+          "Address:",
+          "Telephone:"
+        ],
+        [
+          "214553",
+          "Dr Herron. Andrew",
+          "7 Carlyle st",
+          "Wollstonecraft. NSW 2065",
+          "9460 9943"
+        ],
+        [
+          "Patient ID:",
+          "Species:",
+          "Breed'/",
+          "Sex,",
+          "Color:",
+          "Microchip:'",
+          "Birth Date/"
+        ],
+        [
+          "431657,",
+          "Eddie",
+          "Feline",
+          "Shorthair, Domestic",
+          "Male",
+          "Black",
+          "981000300550586",
+          "01-11-2011"
+        ],
+        [
+          "I hereby certify that the above animal has had a general health check and vaccination, the following vaccinations are"
+        ],
+        [
+          "current:",
+          "Points to remember:",
+          "*Full protection after vaccination may take 2 weeks",
+          "*A 6 monthl booster for bordetella is re uired for boardin otherwise a earl vaccinati"
+        ],
+        [
+          "uffici n"
+        ]
+      ]
+        )
     })
   })
+  describe('#pickDataRegions', function () {
+    it('should pick only regions with data', function () {
+      let result = parser.pickDataRegions(parser.flattenWords(testDatas[0].regions))
+      chai.expect(result).to.deep.equal(
+        [
+          {
+            data: ['214553', 'Dr Herron, Andrew', '7 Carlyle st', 'Wollstonecraft, NSW 2065', '9460 9943' ]
+          },
+          {
+            data: [ '131657','Eddie','Feline','Shorthair, Domestic','Male','Black','981000300550586','01-11-2011' ]
+          }
+        ]
+      )
 
-  describe('#stage2', function () {
-    it('should return snake case labels for labelRegion', function () {
-      var st1 = parser.stage1(testData)
-      var st2 = parser.stage2(st1)
-
-      chai.expect(st2[0].labelRegion.map(l => l.value)).to.deep.equal([
-        'client_id', 'client_name', 'address', 'telephone'
-      ])
-      chai.expect(st2[1].labelRegion.map(l => l.value)).to.deep.equal([
-        'patient_id', 'name', 'species', 'color', 'microchip', 'birth_date'
-      ])
-    })
-  })
-
-  describe('#stage3', function () {
-    it('should return data for dataRegion', function () {
-      var st1 = parser.stage1(testData)
-      var st2 = parser.stage2(st1)
-      var st3 = parser.stage3(st2)
-
-      chai.expect(st3[0].dataRegion.map(l => l.value)).to.deep.equal([
-        ' 214553', ' Dr Herron, Andrew', ' 7 Carlyle st',
-        ' Wollstonecraft, NSW 2065', ' 9460 9943'
-      ])
-      chai.expect(st3[1].dataRegion.map(l => l.value)).to.deep.equal([
-        ' 131657', ' Eddie', ' Feline', ' Shorthair, Domestic',
-        ' Male', ' Black', ' 981000300550586', ' 01-11-2011'
-      ])
-    })
-  })
-
-  describe('#stage4', function () {
-    it('should match labels with values', function () {
-      var st1 = parser.stage1(testData)
-      var st2 = parser.stage2(st1)
-      var st3 = parser.stage3(st2)
-      var st4 = parser.stage4(st3)
-
-      chai.expect(st4[0].labelRegion.map(l => l.value)).to.deep.equal([
-        'client_id', 'client_name', 'address', 'telephone'
-      ])
-      chai.expect(st4[0].dataRegion.map(l => l.value)).to.deep.equal([
-        ' 214553', ' Dr Herron, Andrew',
-        ' 7 Carlyle st  Wollstonecraft, NSW 2065', ' 9460 9943'
-      ])
-      chai.expect(st4[1].labelRegion.map(l => l.value)).to.deep.equal([
-        'patient_id', 'name', 'species', 'color', 'microchip', 'birth_date'
-      ])
-      chai.expect(st4[1].dataRegion.map(l => l.value)).to.deep.equal([
-        ' 131657', ' Eddie', ' Feline',
-        ' Black', ' 981000300550586', ' 01-11-2011'
-      ])
-    })
-  })
-
-  describe('#parse', function () {
-    it('should return key/value list from ocr data', function () {
-      var structuredData = parser.parse(testData)
-
-      chai.expect(structuredData).to.deep.equal([
-        { label: 'client_id', value: '214553' },
-        { label: 'client_name', value: 'Dr Herron, Andrew' },
-        { label: 'address', value: '7 Carlyle st  Wollstonecraft, NSW 2065' },
-        { label: 'telephone', value: '9460 9943' },
-        { label: 'patient_id', value: '131657' },
-        { label: 'name', value: 'Eddie' },
-        { label: 'species', value: 'Feline' },
-        { label: 'color', value: 'Black' },
-        { label: 'microchip', value: '981000300550586' },
-        { label: 'birth_date', value: '01-11-2011' }
-      ])
+      result = parser.pickDataRegions(parser.flattenWords(testDatas[1].regions))
+      chai.expect(result).to.deep.equal(
+        [
+          {
+            data: ['214553', 'Dr Herron. Andrew', '7 Carlyle st', 'Wollstonecraft. NSW 2065', '9460 9943' ]
+          },
+          {
+            data: [ '431657,','Eddie','Feline','Shorthair, Domestic','Male','Black','981000300550586','01-11-2011' ]
+          }
+        ]
+      )
     })
   })
 })
