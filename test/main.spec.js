@@ -141,8 +141,55 @@ describe('Parser', () => {
         [
           "uffici n"
         ]
-      ]
-        )
+      ])
+
+      chai.expect(parser.flattenWords(testDatas['bad-data-1'].regions)).to.deep.equal([
+        [
+          "ealth Certificate"
+        ],
+        [
+          "aient",
+          "Client Name:",
+          "Address:",
+          "Telephone:"
+        ],
+        [
+          "Vaccma",
+          "214553",
+          "Dr Herron, Andrew",
+          "7 Carlyle St",
+          "Wollstonecraft. NSW 2065",
+          "9460 9943"
+        ],
+        [
+          "Patient ID:",
+          "Name:",
+          "Species:",
+          "Breed:",
+          "Sex:",
+          "Color",
+          "Microchip:",
+          "Birth Date:"
+        ],
+        [
+          "131657",
+          "Eddie",
+          "Feline",
+          "Shorthair Domestic",
+          "Male",
+          "Black",
+          "981000300550586",
+          "01-11-2011"
+        ],
+        [
+          "I hereby certify that the above animal has had a general health check and vaccination. he following Vaccinations are",
+          "current.",
+          "Points to remember:",
+          "*Full protection after vaccination may take 2 weeks",
+          "*A 6 monthly booster for bordetella is required for' boarding otherwise a yearly vaccination :ii$ sufficient.",
+          "*Vaccines are harmless-Th"
+        ]
+      ])
     })
   })
 
@@ -311,7 +358,7 @@ describe('Parser', () => {
   })
 
   describe('#parse', () => {
-    it('should apply all data transformation functions', () => {
+    it('should parse ok dataset', () => {
       let result = parser.parse(testDatas['ok-1'])
       chai.expect(result).to.deep.equal({
         'client_id': 214553,
@@ -327,8 +374,10 @@ describe('Parser', () => {
         'microchip': 981000300550586,
         'birth_date': '01-11-2011'
       })
+    })
 
-      result = parser.parse(testDatas['bad-labels-1'])
+    it('should parse dataset with bad labels', () => {
+      let result = parser.parse(testDatas['bad-labels-1'])
       chai.expect(result).to.deep.equal({
         'client_id': 214553,
         'client_name': 'Dr Herron. Andrew',
@@ -343,12 +392,14 @@ describe('Parser', () => {
         'microchip': 981000300550586,
         'birth_date': '01-11-2011'
       })
+    })
 
-      result = parser.parse(testDatas['bad-data-1'])
+    it('should parse dataset with bad data', () => {
+      let result = parser.parse(testDatas['bad-data-1'])
       chai.expect(result).to.deep.equal({
         'client_id': 214553,
-        'client_name': 'Dr Herron. Andrew',
-        'address': '7 Carlyle st Wollstonecraft. NSW 2065',
+        'client_name': 'Dr Herron, Andrew',
+        'address': '7 Carlyle St Wollstonecraft. NSW 2065',
         'telephone': '9460 9943',
         'patient_id': 131657,
         'name': 'Eddie',
@@ -363,6 +414,7 @@ describe('Parser', () => {
 
     it('should return defaults in case of non-JSON input data', () => {
       chai.expect(parser.parse('nojsonhere')).to.deep.equal(parser.defaults())
+      chai.expect(parser.parse('/.,\';\[]“‘’”')).to.deep.equal(parser.defaults())
       chai.expect(parser.parse('<xml></xml>')).to.deep.equal(parser.defaults())
       chai.expect(parser.parse('')).to.deep.equal(parser.defaults())
       chai.expect(parser.parse(3000)).to.deep.equal(parser.defaults())

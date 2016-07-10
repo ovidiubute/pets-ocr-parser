@@ -56,11 +56,36 @@ function mergeData(contentRegions) {
       // We may have an overflowable field, or
       // OCR has detected more data than needed
       // We can check the second case by some type inference
+
+      // This section's labels from config
+      let currentSectionLabels = _.filter(LABELS, (label) => {
+        return label.position === contentRegionIndex
+      })
+      // Slugs only -- will help out to know where we can start overflowing
+      let currentSectionLabelSlugs = _.map(currentSectionLabels, label => label.slug)
+
+      // First label to check data types
+      // We cannot really check all data types since data can overflow
+      // We use a trick here since the first label is always an Integer
+      let firstDataElementType = _.get(_.head(currentSectionLabels), 'meta.data.type')
+      if (firstDataElementType === 'Integer') {
+        // toInteger will return 0 for invalid numbers
+        let firstElementTypeCorrect = _[`to${firstDataElementType}`].call(null,
+          _.head(contentRegion.data)
+        ) > 0
+
+        if (!firstElementTypeCorrect) {
+          // First element data is invalid, remove it
+          contentRegion.data = _.drop(contentRegion.data, 1)
+        }
+
+        // Recalculate diff because we've mutated the array
+        dataLengthDiff = contentRegion.data.length - contentRegion.labels.length
+      }
+
+      // Overflowable data/labels from this section
       let overflowableLabels = _.map(_.filter(LABELS, (label) => {
         return label.meta.data.canOverflow && label.position === contentRegionIndex
-      }), label => label.slug)
-      let currentSectionLabels = _.map(_.filter(LABELS, (label) => {
-        return label.position === contentRegionIndex
       }), label => label.slug)
 
       if (overflowableLabels.length) {
@@ -70,7 +95,7 @@ function mergeData(contentRegions) {
           // NOTE: this will only work with one overflowable data per section,
           // otherwise there's no way to determine how many lines each data/label
           // has overflown
-          let overflowIndex = _.indexOf(currentSectionLabels, overflowableLabel)
+          let overflowIndex = _.indexOf(currentSectionLabelSlugs, overflowableLabel)
           let newData = _.concat(
             // First elements until index of overflowed data
             _.take(contentRegion.data, overflowIndex),

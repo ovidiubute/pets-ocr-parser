@@ -1,5 +1,4 @@
 module.exports = {
-  "fixture_id": 1,
   "language": "en",
   "textAngle": 0,
   "orientation": "Up",
