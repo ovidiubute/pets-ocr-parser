@@ -9,7 +9,6 @@ function flattenWords(rawRegions) {
       return _.join(line.words.map(word => word.text), ' ')
     })
   })
-  return result
 }
 
 // Filter out regions that do not contain labels by configuration
