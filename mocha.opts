@@ -1,0 +1,6 @@
+--require test/setup
+--reporter nyan
+--recursive
+--sort
+--ui bdd
+--growl
