@@ -1,14 +1,15 @@
-var parser = require('../src/pets-parser-1')
-var testDatas = [
-  require('./fixtures/pets-ocr-data-1'),
-  require('./fixtures/pets-ocr-data-2')
-]
+var parser = require('../src/main')
+var testDatas = {
+  'ok-1': require('./fixtures/ok-1'),
+  'bad-labels-1': require('./fixtures/bad-labels-1'),
+  'bad-data-1': require('./fixtures/bad-data-1')
+}
 var chai = require('chai')
 
-describe('VET Parser', function () {
+describe('Parser', function () {
   describe('#flattenWords', function () {
     it('should flatten regions by merging all words per line', () => {
-      chai.expect(parser.flattenWords(testDatas[0].regions)).to.deep.equal([
+      chai.expect(parser.flattenWords(testDatas['ok-1'].regions)).to.deep.equal([
         [
           "www.vetmed.com.au",
           "Vaccination & Health Certificate"
@@ -64,7 +65,7 @@ describe('VET Parser', function () {
         ]
       ])
 
-      chai.expect(parser.flattenWords(testDatas[1].regions)).to.deep.equal([
+      chai.expect(parser.flattenWords(testDatas['bad-labels-1'].regions)).to.deep.equal([
         [
           "Randwjck NSW 2031"
         ],
@@ -129,7 +130,7 @@ describe('VET Parser', function () {
 
   describe('#pickDataRegions', function () {
     it('should pick only regions with data', function () {
-      let result = parser.pickDataRegions(parser.flattenWords(testDatas[0].regions))
+      let result = parser.pickDataRegions(parser.flattenWords(testDatas['ok-1'].regions))
       chai.expect(result).to.deep.equal(
         [
           {
@@ -141,7 +142,7 @@ describe('VET Parser', function () {
         ]
       )
 
-      result = parser.pickDataRegions(parser.flattenWords(testDatas[1].regions))
+      result = parser.pickDataRegions(parser.flattenWords(testDatas['bad-labels-1'].regions))
       chai.expect(result).to.deep.equal(
         [
           {
@@ -157,7 +158,7 @@ describe('VET Parser', function () {
 
   describe('#conjLabels', () => {
     it('should add labels from configuration', () => {
-      let result = parser.conjLabels(parser.pickDataRegions(parser.flattenWords(testDatas[0].regions)))
+      let result = parser.conjLabels(parser.pickDataRegions(parser.flattenWords(testDatas['ok-1'].regions)))
       chai.expect(result).to.deep.equal(
         [
           {
@@ -171,7 +172,7 @@ describe('VET Parser', function () {
         ]
       )
 
-      result = parser.conjLabels(parser.pickDataRegions(parser.flattenWords(testDatas[1].regions)))
+      result = parser.conjLabels(parser.pickDataRegions(parser.flattenWords(testDatas['bad-labels-1'].regions)))
       chai.expect(result).to.deep.equal(
         [
           {
@@ -189,7 +190,7 @@ describe('VET Parser', function () {
 
   describe('#mergeData', () => {
     it('should merge or remove data from data section according to label config', () => {
-      let result = parser.mergeData(parser.conjLabels(parser.pickDataRegions(parser.flattenWords(testDatas[0].regions))))
+      let result = parser.mergeData(parser.conjLabels(parser.pickDataRegions(parser.flattenWords(testDatas['ok-1'].regions))))
       chai.expect(result).to.deep.equal(
         [
           {
@@ -203,7 +204,7 @@ describe('VET Parser', function () {
         ]
       )
 
-      result = parser.mergeData(parser.conjLabels(parser.pickDataRegions(parser.flattenWords(testDatas[1].regions))))
+      result = parser.mergeData(parser.conjLabels(parser.pickDataRegions(parser.flattenWords(testDatas['bad-labels-1'].regions))))
       chai.expect(result).to.deep.equal(
         [
           {
@@ -220,7 +221,7 @@ describe('VET Parser', function () {
 
     describe('#zipLabelsWithData', () => {
       it('should return a list of objects where label is the key and the value is taken from data', () => {
-        let result = parser.zipLabelsWithData(parser.mergeData(parser.conjLabels(parser.pickDataRegions(parser.flattenWords(testDatas[0].regions)))))
+        let result = parser.zipLabelsWithData(parser.mergeData(parser.conjLabels(parser.pickDataRegions(parser.flattenWords(testDatas['ok-1'].regions)))))
         chai.expect(result).to.deep.equal({
           'client_id': '214553',
           'client_name': 'Dr Herron, Andrew',
@@ -236,7 +237,7 @@ describe('VET Parser', function () {
           'birth_date': '01-11-2011'
         })
 
-        result = parser.zipLabelsWithData(parser.mergeData(parser.conjLabels(parser.pickDataRegions(parser.flattenWords(testDatas[1].regions)))))
+        result = parser.zipLabelsWithData(parser.mergeData(parser.conjLabels(parser.pickDataRegions(parser.flattenWords(testDatas['bad-labels-1'].regions)))))
         chai.expect(result).to.deep.equal({
           'client_id': '214553',
           'client_name': 'Dr Herron. Andrew',
@@ -256,7 +257,7 @@ describe('VET Parser', function () {
 
     describe('#applyDataTypes', () => {
       it('should return correct data types', () => {
-        let result = parser.applyDataTypes(parser.zipLabelsWithData(parser.mergeData(parser.conjLabels(parser.pickDataRegions(parser.flattenWords(testDatas[0].regions))))))
+        let result = parser.applyDataTypes(parser.zipLabelsWithData(parser.mergeData(parser.conjLabels(parser.pickDataRegions(parser.flattenWords(testDatas['ok-1'].regions))))))
         chai.expect(result).to.deep.equal({
           'client_id': 214553,
           'client_name': 'Dr Herron, Andrew',
@@ -272,7 +273,7 @@ describe('VET Parser', function () {
           'birth_date': '01-11-2011'
         })
 
-        result = parser.applyDataTypes(parser.zipLabelsWithData(parser.mergeData(parser.conjLabels(parser.pickDataRegions(parser.flattenWords(testDatas[1].regions))))))
+        result = parser.applyDataTypes(parser.zipLabelsWithData(parser.mergeData(parser.conjLabels(parser.pickDataRegions(parser.flattenWords(testDatas['bad-labels-1'].regions))))))
         chai.expect(result).to.deep.equal({
           'client_id': 214553,
           'client_name': 'Dr Herron. Andrew',
@@ -292,7 +293,7 @@ describe('VET Parser', function () {
 
     describe('#parse', () => {
       it('should apply all data transformation functions', () => {
-        let result = parser.parse(testDatas[0])
+        let result = parser.parse(testDatas['ok-1'])
         chai.expect(result).to.deep.equal({
           'client_id': 214553,
           'client_name': 'Dr Herron, Andrew',
@@ -308,7 +309,7 @@ describe('VET Parser', function () {
           'birth_date': '01-11-2011'
         })
 
-        result = parser.parse(testDatas[1])
+        result = parser.parse(testDatas['bad-labels-1'])
         chai.expect(result).to.deep.equal({
           'client_id': 214553,
           'client_name': 'Dr Herron. Andrew',
@@ -318,6 +319,22 @@ describe('VET Parser', function () {
           'name': 'Eddie',
           'species': 'Feline',
           'breed': 'Shorthair, Domestic',
+          'sex': 'Male',
+          'color': 'Black',
+          'microchip': 981000300550586,
+          'birth_date': '01-11-2011'
+        })
+
+        result = parser.parse(testDatas['bad-data-1'])
+        chai.expect(result).to.deep.equal({
+          'client_id': 214553,
+          'client_name': 'Dr Herron. Andrew',
+          'address': '7 Carlyle st Wollstonecraft. NSW 2065',
+          'telephone': '9460 9943',
+          'patient_id': 131657,
+          'name': 'Eddie',
+          'species': 'Feline',
+          'breed': 'Shorthair Domestic',
           'sex': 'Male',
           'color': 'Black',
           'microchip': 981000300550586,

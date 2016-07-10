@@ -1,1 +1,1 @@
-module.exports = require('./src/pets-parser-1').parse
+module.exports = require('./src/main').parse

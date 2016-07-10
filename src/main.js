@@ -1,5 +1,5 @@
 const _ = require('lodash')
-const LABELS = require('./labels')
+const LABELS = require('./config/labels')
 const helpers = require('./helpers')
 
 // Transform to regions only with words merged by line

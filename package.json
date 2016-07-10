@@ -1,19 +1,23 @@
 {
-  "name": "pets",
-  "version": "0.0.1",
+  "name": "ovi-pets-ocr-parser",
+  "version": "0.1.0",
   "description": "Pets ocr data parser",
   "main": "index.js",
   "scripts": {
-    "test": "_mocha -R spec"
+    "test": "_mocha -R spec",
+    "coverage": "istanbul cover _mocha -- -R spec"
   },
   "author": "Ovidiu Bute <ovidiu.bute@gmail.com>",
-  "license": "SEE LICENSE",
+  "license": "MIT",
   "devDependencies": {
-    "chai": "^3.5.0",
-    "mocha": "^2.5.3"
+    "chai": "3.5.0",
+    "istanbul": "0.4.4",
+    "mocha": "2.5.3"
   },
   "dependencies": {
-    "autocorrect": "^1.2.0",
-    "lodash": "^4.13.1"
+    "lodash": "4.13.1"
+  },
+  "engines": {
+    "node": ">=4.4.5"
   }
 }
