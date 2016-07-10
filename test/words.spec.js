@@ -1,5 +1,4 @@
 const words = require('../src/config/words')
-const chai = require('chai')
 
 describe('Words', () => {
   it('should return list of words based on configured labels', () => {

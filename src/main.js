@@ -120,15 +120,39 @@ function applyDataTypes(structuredData) {
   return structuredData
 }
 
+function defaultValue(configLabel) {
+  return (configLabel.meta.data.type === 'String' ? '' :
+    configLabel.meta.data.type === 'Number' ||
+    configLabel.meta.data.type === 'Integer' ? 0 : null
+  )
+}
+
+function defaults() {
+  return _.reduce(_.map(LABELS, (label) => {
+    return {
+      label: label.slug,
+      value: defaultValue(label)
+    }
+  }), (accum, obj) => {
+    accum[obj.label] = obj.value
+
+    return accum
+  }, {})
+}
+
 function parse(data) {
-  return _.flow([
-    flattenWords,
-    pickDataRegions,
-    conjLabels,
-    mergeData,
-    zipLabelsWithData,
-    applyDataTypes
-  ])(data.regions)
+  try {
+    return _.flow([
+      flattenWords,
+      pickDataRegions,
+      conjLabels,
+      mergeData,
+      zipLabelsWithData,
+      applyDataTypes
+    ])(data.regions)
+  } catch (e) {
+    return defaults()
+  }
 }
 
 module.exports = {
@@ -138,5 +162,6 @@ module.exports = {
   mergeData,
   zipLabelsWithData,
   applyDataTypes,
+  defaults,
   parse
 }

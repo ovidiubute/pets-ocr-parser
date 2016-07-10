@@ -1,11 +1,11 @@
 {
   "name": "ovi-pets-ocr-parser",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Pets ocr data parser",
   "main": "index.js",
   "scripts": {
-    "test": "_mocha -R spec",
-    "coverage": "istanbul cover _mocha -- -R spec"
+    "test": "_mocha test",
+    "coverage": "istanbul cover _mocha test"
   },
   "author": "Ovidiu Bute <ovidiu.bute@gmail.com>",
   "license": "MIT",

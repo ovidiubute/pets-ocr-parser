@@ -4,9 +4,27 @@ var testDatas = {
   'bad-labels-1': require('./fixtures/bad-labels-1'),
   'bad-data-1': require('./fixtures/bad-data-1')
 }
-var chai = require('chai')
 
-describe('Parser', function () {
+describe('Parser', () => {
+  describe('#defaults', () => {
+    it('should provide default values according to label config', () => {
+      chai.expect(parser.defaults()).to.deep.equal({
+        'client_id': 0,
+        'client_name': '',
+        'address': '',
+        'telephone': '',
+        'patient_id': 0,
+        'name': '',
+        'species': '',
+        'breed': '',
+        'sex': '',
+        'color': '',
+        'microchip': 0,
+        'birth_date': ''
+      })
+    })
+  })
+
   describe('#flattenWords', function () {
     it('should flatten regions by merging all words per line', () => {
       chai.expect(parser.flattenWords(testDatas['ok-1'].regions)).to.deep.equal([
@@ -218,129 +236,159 @@ describe('Parser', function () {
         ]
       )
     })
+  })
 
-    describe('#zipLabelsWithData', () => {
-      it('should return a list of objects where label is the key and the value is taken from data', () => {
-        let result = parser.zipLabelsWithData(parser.mergeData(parser.conjLabels(parser.pickDataRegions(parser.flattenWords(testDatas['ok-1'].regions)))))
-        chai.expect(result).to.deep.equal({
-          'client_id': '214553',
-          'client_name': 'Dr Herron, Andrew',
-          'address': '7 Carlyle st Wollstonecraft, NSW 2065',
-          'telephone': '9460 9943',
-          'patient_id': '131657',
-          'name': 'Eddie',
-          'species': 'Feline',
-          'breed': 'Shorthair, Domestic',
-          'sex': 'Male',
-          'color': 'Black',
-          'microchip': '981000300550586',
-          'birth_date': '01-11-2011'
-        })
+  describe('#zipLabelsWithData', () => {
+    it('should return a list of objects where label is the key and the value is taken from data', () => {
+      let result = parser.zipLabelsWithData(parser.mergeData(parser.conjLabels(parser.pickDataRegions(parser.flattenWords(testDatas['ok-1'].regions)))))
+      chai.expect(result).to.deep.equal({
+        'client_id': '214553',
+        'client_name': 'Dr Herron, Andrew',
+        'address': '7 Carlyle st Wollstonecraft, NSW 2065',
+        'telephone': '9460 9943',
+        'patient_id': '131657',
+        'name': 'Eddie',
+        'species': 'Feline',
+        'breed': 'Shorthair, Domestic',
+        'sex': 'Male',
+        'color': 'Black',
+        'microchip': '981000300550586',
+        'birth_date': '01-11-2011'
+      })
 
-        result = parser.zipLabelsWithData(parser.mergeData(parser.conjLabels(parser.pickDataRegions(parser.flattenWords(testDatas['bad-labels-1'].regions)))))
-        chai.expect(result).to.deep.equal({
-          'client_id': '214553',
-          'client_name': 'Dr Herron. Andrew',
-          'address': '7 Carlyle st Wollstonecraft. NSW 2065',
-          'telephone': '9460 9943',
-          'patient_id': '431657,',
-          'name': 'Eddie',
-          'species': 'Feline',
-          'breed': 'Shorthair, Domestic',
-          'sex': 'Male',
-          'color': 'Black',
-          'microchip': '981000300550586',
-          'birth_date': '01-11-2011'
-        })
+      result = parser.zipLabelsWithData(parser.mergeData(parser.conjLabels(parser.pickDataRegions(parser.flattenWords(testDatas['bad-labels-1'].regions)))))
+      chai.expect(result).to.deep.equal({
+        'client_id': '214553',
+        'client_name': 'Dr Herron. Andrew',
+        'address': '7 Carlyle st Wollstonecraft. NSW 2065',
+        'telephone': '9460 9943',
+        'patient_id': '431657,',
+        'name': 'Eddie',
+        'species': 'Feline',
+        'breed': 'Shorthair, Domestic',
+        'sex': 'Male',
+        'color': 'Black',
+        'microchip': '981000300550586',
+        'birth_date': '01-11-2011'
+      })
+    })
+  })
+
+  describe('#applyDataTypes', () => {
+    it('should return correct data types', () => {
+      let result = parser.applyDataTypes(parser.zipLabelsWithData(parser.mergeData(parser.conjLabels(parser.pickDataRegions(parser.flattenWords(testDatas['ok-1'].regions))))))
+      chai.expect(result).to.deep.equal({
+        'client_id': 214553,
+        'client_name': 'Dr Herron, Andrew',
+        'address': '7 Carlyle st Wollstonecraft, NSW 2065',
+        'telephone': '9460 9943',
+        'patient_id': 131657,
+        'name': 'Eddie',
+        'species': 'Feline',
+        'breed': 'Shorthair, Domestic',
+        'sex': 'Male',
+        'color': 'Black',
+        'microchip': 981000300550586,
+        'birth_date': '01-11-2011'
+      })
+
+      result = parser.applyDataTypes(parser.zipLabelsWithData(parser.mergeData(parser.conjLabels(parser.pickDataRegions(parser.flattenWords(testDatas['bad-labels-1'].regions))))))
+      chai.expect(result).to.deep.equal({
+        'client_id': 214553,
+        'client_name': 'Dr Herron. Andrew',
+        'address': '7 Carlyle st Wollstonecraft. NSW 2065',
+        'telephone': '9460 9943',
+        'patient_id': 431657,
+        'name': 'Eddie',
+        'species': 'Feline',
+        'breed': 'Shorthair, Domestic',
+        'sex': 'Male',
+        'color': 'Black',
+        'microchip': 981000300550586,
+        'birth_date': '01-11-2011'
+      })
+    })
+  })
+
+  describe('#parse', () => {
+    it('should apply all data transformation functions', () => {
+      let result = parser.parse(testDatas['ok-1'])
+      chai.expect(result).to.deep.equal({
+        'client_id': 214553,
+        'client_name': 'Dr Herron, Andrew',
+        'address': '7 Carlyle st Wollstonecraft, NSW 2065',
+        'telephone': '9460 9943',
+        'patient_id': 131657,
+        'name': 'Eddie',
+        'species': 'Feline',
+        'breed': 'Shorthair, Domestic',
+        'sex': 'Male',
+        'color': 'Black',
+        'microchip': 981000300550586,
+        'birth_date': '01-11-2011'
+      })
+
+      result = parser.parse(testDatas['bad-labels-1'])
+      chai.expect(result).to.deep.equal({
+        'client_id': 214553,
+        'client_name': 'Dr Herron. Andrew',
+        'address': '7 Carlyle st Wollstonecraft. NSW 2065',
+        'telephone': '9460 9943',
+        'patient_id': 431657,
+        'name': 'Eddie',
+        'species': 'Feline',
+        'breed': 'Shorthair, Domestic',
+        'sex': 'Male',
+        'color': 'Black',
+        'microchip': 981000300550586,
+        'birth_date': '01-11-2011'
+      })
+
+      result = parser.parse(testDatas['bad-data-1'])
+      chai.expect(result).to.deep.equal({
+        'client_id': 214553,
+        'client_name': 'Dr Herron. Andrew',
+        'address': '7 Carlyle st Wollstonecraft. NSW 2065',
+        'telephone': '9460 9943',
+        'patient_id': 131657,
+        'name': 'Eddie',
+        'species': 'Feline',
+        'breed': 'Shorthair Domestic',
+        'sex': 'Male',
+        'color': 'Black',
+        'microchip': 981000300550586,
+        'birth_date': '01-11-2011'
       })
     })
 
-    describe('#applyDataTypes', () => {
-      it('should return correct data types', () => {
-        let result = parser.applyDataTypes(parser.zipLabelsWithData(parser.mergeData(parser.conjLabels(parser.pickDataRegions(parser.flattenWords(testDatas['ok-1'].regions))))))
-        chai.expect(result).to.deep.equal({
-          'client_id': 214553,
-          'client_name': 'Dr Herron, Andrew',
-          'address': '7 Carlyle st Wollstonecraft, NSW 2065',
-          'telephone': '9460 9943',
-          'patient_id': 131657,
-          'name': 'Eddie',
-          'species': 'Feline',
-          'breed': 'Shorthair, Domestic',
-          'sex': 'Male',
-          'color': 'Black',
-          'microchip': 981000300550586,
-          'birth_date': '01-11-2011'
-        })
-
-        result = parser.applyDataTypes(parser.zipLabelsWithData(parser.mergeData(parser.conjLabels(parser.pickDataRegions(parser.flattenWords(testDatas['bad-labels-1'].regions))))))
-        chai.expect(result).to.deep.equal({
-          'client_id': 214553,
-          'client_name': 'Dr Herron. Andrew',
-          'address': '7 Carlyle st Wollstonecraft. NSW 2065',
-          'telephone': '9460 9943',
-          'patient_id': 431657,
-          'name': 'Eddie',
-          'species': 'Feline',
-          'breed': 'Shorthair, Domestic',
-          'sex': 'Male',
-          'color': 'Black',
-          'microchip': 981000300550586,
-          'birth_date': '01-11-2011'
-        })
-      })
+    it('should return defaults in case of non-JSON input data', () => {
+      chai.expect(parser.parse('nojsonhere')).to.deep.equal(parser.defaults())
+      chai.expect(parser.parse('<xml></xml>')).to.deep.equal(parser.defaults())
+      chai.expect(parser.parse('')).to.deep.equal(parser.defaults())
+      chai.expect(parser.parse(3000)).to.deep.equal(parser.defaults())
+      chai.expect(parser.parse(['3','4','5'])).to.deep.equal(parser.defaults())
+      chai.expect(parser.parse({'a':2})).to.deep.equal(parser.defaults())
+      chai.expect(parser.parse({})).to.deep.equal(parser.defaults())
     })
 
-    describe('#parse', () => {
-      it('should apply all data transformation functions', () => {
-        let result = parser.parse(testDatas['ok-1'])
-        chai.expect(result).to.deep.equal({
-          'client_id': 214553,
-          'client_name': 'Dr Herron, Andrew',
-          'address': '7 Carlyle st Wollstonecraft, NSW 2065',
-          'telephone': '9460 9943',
-          'patient_id': 131657,
-          'name': 'Eddie',
-          'species': 'Feline',
-          'breed': 'Shorthair, Domestic',
-          'sex': 'Male',
-          'color': 'Black',
-          'microchip': 981000300550586,
-          'birth_date': '01-11-2011'
+    it('should return defaults in case of incorrect JSON input data', () => {
+      chai.expect(parser.parse(
+        JSON.stringify({
+          "shouldberegionshere": [{
+        		"boundingBox": "1031,87,446,55",
+        		"lines": [{
+        			"boundingBox": "1031,87,446,55",
+        			"words": [{
+        				"boundingBox": "1031,91,136,51",
+        				"text": "ealth"
+        			}, {
+        				"boundingBox": "1185,87,292,52",
+        				"text": "Certificate"
+        			}]
+        		}]
+        	}]
         })
-
-        result = parser.parse(testDatas['bad-labels-1'])
-        chai.expect(result).to.deep.equal({
-          'client_id': 214553,
-          'client_name': 'Dr Herron. Andrew',
-          'address': '7 Carlyle st Wollstonecraft. NSW 2065',
-          'telephone': '9460 9943',
-          'patient_id': 431657,
-          'name': 'Eddie',
-          'species': 'Feline',
-          'breed': 'Shorthair, Domestic',
-          'sex': 'Male',
-          'color': 'Black',
-          'microchip': 981000300550586,
-          'birth_date': '01-11-2011'
-        })
-
-        result = parser.parse(testDatas['bad-data-1'])
-        chai.expect(result).to.deep.equal({
-          'client_id': 214553,
-          'client_name': 'Dr Herron. Andrew',
-          'address': '7 Carlyle st Wollstonecraft. NSW 2065',
-          'telephone': '9460 9943',
-          'patient_id': 131657,
-          'name': 'Eddie',
-          'species': 'Feline',
-          'breed': 'Shorthair Domestic',
-          'sex': 'Male',
-          'color': 'Black',
-          'microchip': 981000300550586,
-          'birth_date': '01-11-2011'
-        })
-      })
+      )).to.deep.equal(parser.defaults())
     })
   })
 })

@@ -1,5 +1,4 @@
 var helpers = require('../src/helpers')
-var chai = require('chai')
 
 describe('Helpers', () => {
   describe('#clean', () => {
